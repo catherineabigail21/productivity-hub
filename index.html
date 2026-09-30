@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <link rel="manifest" href="data:application/manifest+json;utf-8,%7B%22name%22%3A%22Productivity%20Hub%22%2C%22short_name%22%3A%22ProdHub%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fdf2f8%22%2C%22theme_color%22%3A%22%23f472b6%22%7D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ProductivityHub">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#f472b6">
+  <meta name="description" content="Productivity Hub — Kelola tugas, fokus Pomodoro, dan jurnal refleksi belajar dalam satu aplikasi mobile modern.">
+  <title>Productivity Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ===================== THEME VARIABLES & BASE ===================== */
+    :root {
+      --bg-page: #fdf2f8;
+      --shell-bg: #fffafa;
+      --shell-border: rgba(251, 207, 232, 0.8);
+      --card-bg: #ffffff;
+      --card-border: #fce7f3;
+      --card-sub-bg: #fdf2f8;
+      --card-entry-bg: #fffafa;
+      --card-entry-border: #fff1f2;
+      --text-main: #1e293b;
+      --text-muted: #9ca3af;
+      --text-title: #831843;
+      --text-accent: #db2777;
+      --input-bg: #ffffff;
+      --input-border: #fce7f3;
+      --input-text: #1e293b;
+      --nav-bg: rgba(255, 255, 255, 0.94);
+      --nav-border: #fce7f3;
+      --modal-bg: #ffffff;
+      --modal-border: rgba(251, 207, 232, 0.8);
+      --timer-ring-bg: #fce7f3;
+      --shadow-shell: 0 16px 45px -10px rgba(236, 72, 153, 0.16), 0 4px 20px rgba(0, 0, 0, 0.05);
+      --shadow-card: 0 4px 18px rgba(236, 72, 153, 0.08);
+      --btn-reset-bg: #ffffff;
+      --btn-reset-text: #831843;
+      --btn-delete-bg: #fff1f2;
+      --btn-delete-color: #f43f5e;
+      --header-grad: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #f472b6 100%);
+      --task-done-bg: #fff5f7;
+      --task-done-border: #fbcfe8;
+      --theme-transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    body.dark-mode {
+      --bg-page: #0b0f19;
+      --shell-bg: #111827;
+      --shell-border: #1f2937;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --card-sub-bg: #182234;
+      --card-entry-bg: #162032;
+      --card-entry-border: #233148;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-title: #f472b6;
+      --text-accent: #fb7185;
+      --input-bg: #182234;
+      --input-border: #334155;
+      --input-text: #f8fafc;
+      --nav-bg: rgba(17, 24, 39, 0.95);
+      --nav-border: #1f2937;
+      --modal-bg: #1e293b;
+      --modal-border: #374151;
+      --timer-ring-bg: #273549;
+      --shadow-shell: 0 16px 45px -10px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.3);
+      --btn-reset-bg: #1e293b;
+      --btn-reset-text: #f472b6;
+      --btn-delete-bg: #2d1d25;
+      --btn-delete-color: #fb7185;
+      --header-grad: linear-gradient(135deg, #be123c 0%, #9d174d 50%, #831843 100%);
+      --task-done-bg: #161e2e;
+      --task-done-border: #28354b;
+    }
+
+    /* ===================== RESET & BASE ===================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: var(--theme-transition);
+    }
+
+    /* ============== SMARTPHONE CONTAINER (Mobile-First) ============== */
+    .phone-shell {
+      width: 100%;
+      max-width: 420px;
+      min-height: 100vh;
+      background: var(--shell-bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-shell);
+      border-left: 1px solid var(--shell-border);
+      border-right: 1px solid var(--shell-border);
+      transition: var(--theme-transition);
+    }
+
+    @media (max-width: 420px) {
+      .phone-shell {
+        max-width: 100%;
+        box-shadow: none;
+        border-left: none;
+        border-right: none;
+      }
+    }
+
+    /* ==================== HEADER ==================== */
+    .app-header {
+      background: var(--header-grad);
+      padding: 20px 20px 24px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: background 0.3s ease;
+    }
+    .app-header::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -30%;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(255,255,255,.22) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .app-header::after {
+      content: '';
+      position: absolute;
+      bottom: -40%; left: -20%;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(255,255,255,.14) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,.25);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .header-logo svg { width: 22px; height: 22px; }
+    .header-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -.3px;
+      text-shadow: 0 1px 2px rgba(0,0,0,.08);
+    }
+    .header-date {
+      font-size: 12px;
+      color: rgba(255,255,255,.88);
+      font-weight: 500;
+    }
+
+    /* Dark Mode Toggle Button */
+    .theme-toggle-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.22);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .theme-toggle-btn:hover {
+      background: rgba(255,255,255,0.35);
+      transform: scale(1.05);
+    }
+    .theme-toggle-btn:active { transform: scale(0.92); }
+    .theme-toggle-btn svg { width: 20px; height: 20px; transition: transform 0.3s ease; }
+
+    .header-greeting {
+      margin-top: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .greeting-text {
+      font-size: 14px;
+      color: rgba(255,255,255,.9);
+      font-weight: 500;
+    }
+    .greeting-subtitle {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+      letter-spacing: -.5px;
+    }
+
+    /* Quick stats bar */
+    .quick-stats {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,.22);
+      backdrop-filter: blur(8px);
+      border-radius: 20px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .stat-pill svg { width: 14px; height: 14px; }
+
+    /* ==================== MAIN CONTENT ==================== */
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-bottom: 84px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Tab panels */
+    .tab-panel {
+      display: none;
+      opacity: 0;
+      transform: translateY(12px);
+      animation: panelIn .35s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes panelIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==================== TAB TUGAS (TODO) ==================== */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 10px;
+    }
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-title);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Form Input Cepat */
+    .add-task-area {
+      padding: 0 20px 10px;
+    }
+    .add-task-form {
+      display: flex;
+      gap: 8px;
+    }
+    .add-task-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid var(--input-border);
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--input-text);
+      background: var(--input-bg);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .add-task-input:focus {
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236,72,153,.15);
+    }
+    .add-task-input::placeholder { color: #f472b6; opacity: .7; }
+    .add-task-btn {
+      width: 48px; height: 48px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 14px rgba(236,72,153,.35);
+    }
+    .add-task-btn:active { transform: scale(.92); }
+    .add-task-btn svg { width: 22px; height: 22px; }
+
+    /* Tombol Pemilih Prioritas Berbentuk Pill: Semua, Tinggi, Sedang, Rendah */
+    .priority-row {
+      padding: 0 20px 14px;
+      display: flex;
+      gap: 6px;
+    }
+    .priority-pill {
+      flex: 1;
+      padding: 8px 6px;
+      border-radius: 9999px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all .2s ease;
+      background: var(--card-bg);
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+    .priority-pill .pill-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    /* Semua */
+    .priority-pill.pill-all {
+      border: 1.5px solid var(--card-border);
+      color: var(--text-title);
+    }
+    .priority-pill.pill-all .pill-dot { background: #f472b6; }
+    .priority-pill.pill-all.selected {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #ffffff;
+      border-color: #ec4899;
+      box-shadow: 0 3px 10px rgba(236,72,153,.3);
+    }
+    .priority-pill.pill-all.selected .pill-dot { background: #ffffff; }
+
+    /* Tinggi (Merah #ef4444) */
+    .priority-pill.pill-high {
+      border: 1.5px solid #fee2e2;
+      color: #dc2626;
+    }
+    body.dark-mode .priority-pill.pill-high {
+      border-color: #7f1d1d;
+      color: #f87171;
+    }
+    .priority-pill.pill-high .pill-dot { background: #ef4444; }
+    .priority-pill.pill-high.selected {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #ef4444;
+      box-shadow: 0 3px 10px rgba(239,68,68,.35);
+    }
+    .priority-pill.pill-high.selected .pill-dot { background: #ffffff; }
+
+    /* Sedang (Kuning #f59e0b) */
+    .priority-pill.pill-medium {
+      border: 1.5px solid #fef3c7;
+      color: #d97706;
+    }
+    body.dark-mode .priority-pill.pill-medium {
+      border-color: #78350f;
+      color: #fbbf24;
+    }
+    .priority-pill.pill-medium .pill-dot { background: #f59e0b; }
+    .priority-pill.pill-medium.selected {
+      background: #f59e0b;
+      color: #ffffff;
+      border-color: #f59e0b;
+      box-shadow: 0 3px 10px rgba(245,158,11,.35);
+    }
+    .priority-pill.pill-medium.selected .pill-dot { background: #ffffff; }
+
+    /* Rendah (Hijau #10b981) */
+    .priority-pill.pill-low {
+      border: 1.5px solid #d1fae5;
+      color: #059669;
+    }
+    body.dark-mode .priority-pill.pill-low {
+      border-color: #064e3b;
+      color: #34d399;
+    }
+    .priority-pill.pill-low .pill-dot { background: #10b981; }
+    .priority-pill.pill-low.selected {
+      background: #10b981;
+      color: #ffffff;
+      border-color: #10b981;
+      box-shadow: 0 3px 10px rgba(16,185,129,.35);
+    }
+    .priority-pill.pill-low.selected .pill-dot { background: #ffffff; }
+
+    .priority-pill:active { transform: scale(.95); }
+
+    /* Filter Kategori: Semua, Aktif, Selesai */
+    .filter-row {
+      padding: 0 20px 14px;
+      display: flex;
+      gap: 8px;
+    }
+    .filter-chip {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-title);
+      cursor: pointer;
+      text-align: center;
+      transition: all .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .filter-chip.active {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #ffffff;
+      border-color: #ec4899;
+      box-shadow: 0 3px 10px rgba(236,72,153,.28);
+    }
+    .filter-chip:active { transform: scale(.96); }
+
+    /* Daftar Kartu Sentuh */
+    .task-list {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .task-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow-card);
+      border: 1.5px solid var(--card-border);
+      position: relative;
+      transition: opacity .35s cubic-bezier(.4,0,.2,1), transform .25s ease, background .25s, border-color .25s, box-shadow .25s;
+      -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
+    }
+    .task-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      border-radius: 4px 0 0 4px;
+    }
+    .task-card.priority-high::before { background: #ef4444; }
+    .task-card.priority-medium::before { background: #f59e0b; }
+    .task-card.priority-low::before { background: #10b981; }
+
+    /* Interaktivitas Centang */
+    .task-card.completed {
+      opacity: .6;
+      background: var(--task-done-bg);
+      border-color: var(--task-done-border);
+    }
+    .task-card.completed .task-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .task-card.removing {
+      animation: taskRemove .35s cubic-bezier(.22,1,.36,1) forwards;
+    }
+    @keyframes taskRemove {
+      to { opacity: 0; transform: translateX(60px) scale(.9); height: 0; padding: 0; margin: 0; border: 0; }
+    }
+
+    /* Tombol Centang Bulat di Sisi Kiri */
+    .task-check {
+      width: 26px; height: 26px;
+      border: 2px solid #f472b6;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all .25s cubic-bezier(.4,0,.2,1);
+      background: var(--card-bg);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .task-check.checked {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      border-color: #ec4899;
+      transform: scale(1.05);
+    }
+    .task-check svg {
+      width: 14px; height: 14px;
+      opacity: 0;
+      stroke: #ffffff;
+      transform: scale(0.6);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .task-check.checked svg {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Teks Judul Tugas di Tengah */
+    .task-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .task-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.4;
+      word-break: break-word;
+      transition: color .25s ease, text-decoration .25s ease;
+    }
+    .task-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .task-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 7px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .task-badge.badge-high { background: #fee2e2; color: #ef4444; }
+    .task-badge.badge-medium { background: #fef3c7; color: #d97706; }
+    .task-badge.badge-low { background: #d1fae5; color: #10b981; }
+
+    body.dark-mode .task-badge.badge-high { background: #450a0a; color: #fca5a5; }
+    body.dark-mode .task-badge.badge-medium { background: #451a03; color: #fde68a; }
+    body.dark-mode .task-badge.badge-low { background: #064e3b; color: #6ee7b7; }
+
+    /* Tombol Hapus di Sisi Kanan */
+    .task-delete {
+      width: 34px; height: 34px;
+      border: none;
+      background: var(--btn-delete-bg);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      color: var(--btn-delete-color);
+      transition: all .2s ease;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .task-delete:hover, .task-delete:active {
+      background: #f43f5e;
+      color: #ffffff;
+      transform: scale(1.08);
+    }
+    .task-delete svg { width: 16px; height: 16px; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 42px 20px;
+    }
+    .empty-icon {
+      width: 64px; height: 64px;
+      background: var(--card-sub-bg);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      border: 1px solid var(--card-border);
+    }
+    .empty-icon svg { width: 28px; height: 28px; color: #ec4899; }
+    .empty-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 4px;
+    }
+    .empty-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ==================== TAB FOKUS (POMODORO TIMER) ==================== */
+    .focus-panel { padding: 20px; }
+
+    /* Pilihan Mode Sesi */
+    .session-mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .mode-btn {
+      padding: 12px 10px;
+      border-radius: 16px;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all .25s ease;
+      -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 2px 6px rgba(236, 72, 153, 0.05);
+    }
+    .mode-btn .mode-icon {
+      font-size: 22px;
+    }
+    .mode-btn .mode-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-title);
+      line-height: 1.2;
+    }
+    .mode-btn .mode-sub {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      border-color: #ec4899;
+      box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
+      transform: translateY(-1px);
+    }
+    .mode-btn.active .mode-title {
+      color: #ffffff;
+    }
+    .mode-btn.active .mode-sub {
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .mode-btn:active {
+      transform: scale(0.96);
+    }
+
+    .timer-card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 24px 20px 22px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+      border: 1.5px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+      transition: var(--theme-transition);
+    }
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #f43f5e, #ec4899, #f472b6);
+    }
+
+    .timer-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-accent);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 2px;
+    }
+
+    /* Tampilan Waktu Besar & Ring */
+    .timer-ring-wrapper {
+      position: relative;
+      width: 200px; height: 200px;
+      margin: 10px auto 6px;
+    }
+    .timer-ring {
+      width: 100%; height: 100%;
+      transform: rotate(-90deg);
+    }
+    .timer-ring-bg {
+      fill: none;
+      stroke: var(--timer-ring-bg);
+      stroke-width: 7;
+      transition: stroke 0.3s ease;
+    }
+    .timer-ring-progress {
+      fill: none;
+      stroke: url(#timerGrad);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 565.48;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset .5s ease;
+    }
+    .timer-display {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      cursor: pointer;
+    }
+    .timer-time {
+      font-size: 50px;
+      font-weight: 800;
+      color: var(--text-title);
+      letter-spacing: -2px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .timer-session {
+      font-size: 12px;
+      font-weight: 600;
+      color: #f472b6;
+      margin-top: 6px;
+    }
+
+    /* Pengatur Waktu Kustom: Dapat diatur sendiri secara leluasa */
+    .custom-time-setter {
+      background: var(--card-sub-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 18px;
+      padding: 10px 12px;
+      margin: 10px auto 4px;
+      max-width: 320px;
+      transition: var(--theme-transition);
+    }
+    .setter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+    .setter-current {
+      color: var(--text-accent);
+      background: var(--card-bg);
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      font-weight: 800;
+    }
+    .setter-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .step-btn {
+      width: 38px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-title);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .step-btn:hover {
+      background: var(--card-sub-bg);
+      border-color: #ec4899;
+    }
+    .step-btn:active {
+      transform: scale(0.92);
+      background: #ec4899;
+      color: #ffffff;
+    }
+    .setter-input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0 8px;
+      height: 36px;
+      transition: border-color .2s;
+    }
+    .setter-input-box:focus-within {
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236,72,153,.15);
+    }
+    .setter-input {
+      width: 44px;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-title);
+      text-align: center;
+      background: transparent;
+    }
+    .setter-input::-webkit-outer-spin-button,
+    .setter-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .setter-input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .setter-unit {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    /* Tombol Kontrol Ramah Jempol */
+    .timer-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+    .timer-btn-main {
+      flex: 1.6;
+      min-height: 52px;
+      border: none;
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform .15s ease, box-shadow .2s ease;
+      color: #ffffff;
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .timer-btn-main.paused {
+      background: linear-gradient(135deg, #f59e0b, #fbbf24);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+    }
+    .timer-btn-main:active { transform: scale(0.96); }
+    .timer-btn-main svg { width: 20px; height: 20px; }
+
+    .timer-btn-reset {
+      flex: 1;
+      min-height: 52px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all .2s ease;
+      background: var(--btn-reset-bg);
+      color: var(--btn-reset-text);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .timer-btn-reset:hover {
+      background: var(--card-sub-bg);
+      border-color: #fbcfe8;
+    }
+    .timer-btn-reset:active { transform: scale(0.96); background: var(--card-border); }
+    .timer-btn-reset svg { width: 18px; height: 18px; }
+
+    /* Focus stats */
+    .focus-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .focus-stat-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+      border: 1.5px solid var(--card-border);
+      transition: var(--theme-transition);
+    }
+    .focus-stat-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+    .focus-stat-icon svg { width: 18px; height: 18px; }
+    .focus-stat-icon.pink { background: var(--card-sub-bg); color: #ec4899; }
+    .focus-stat-icon.amber { background: #fffbeb; color: #f59e0b; }
+    body.dark-mode .focus-stat-icon.amber { background: #451a03; color: #fbbf24; }
+    .focus-stat-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-title);
+    }
+    .focus-stat-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ==================== TAB JURNAL REFLEKSI ==================== */
+    .journal-panel { padding: 20px; }
+
+    /* Form Catatan Refleksi */
+    .journal-compose {
+      background: var(--card-bg);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      border: 1.5px solid var(--card-border);
+      margin-bottom: 22px;
+      transition: var(--theme-transition);
+    }
+    .journal-compose-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .journal-compose-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text-title);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Input Tanggal Hari Ini Otomatis */
+    .journal-auto-date {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      background: var(--card-sub-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-accent);
+    }
+    .journal-auto-date svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 6px;
+    }
+
+    /* Mood Section with Expandable / Custom Emoji Picker */
+    .mood-section {
+      margin-bottom: 14px;
+    }
+    .mood-selector {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .mood-btn {
+      flex: 1;
+      min-width: 44px;
+      height: 42px;
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      background: var(--card-bg);
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s ease;
+      -webkit-tap-highlight-color: transparent;
+      color: var(--text-main);
+    }
+    .mood-btn.selected {
+      border-color: #ec4899;
+      background: var(--card-sub-bg);
+      box-shadow: 0 3px 10px rgba(236,72,153,.22);
+      transform: scale(1.06);
+    }
+    .mood-btn:active { transform: scale(.92); }
+
+    .mood-btn.more-btn {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-accent);
+      gap: 3px;
+      padding: 0 10px;
+      flex: 1.2;
+    }
+
+    /* Active custom emoji pill if chosen outside standard */
+    .active-custom-mood {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-sub-bg);
+      border: 1.5px solid #ec4899;
+      border-radius: 14px;
+      padding: 6px 12px;
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-title);
+    }
+    .active-custom-mood.show {
+      display: inline-flex;
+    }
+    .active-custom-mood .mood-char {
+      font-size: 20px;
+    }
+
+    /* Emoji Picker Drawer / Popup */
+    .emoji-drawer {
+      display: none;
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--card-sub-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      animation: panelIn 0.25s ease forwards;
+    }
+    .emoji-drawer.open {
+      display: block;
+    }
+    .emoji-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+    .emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .emoji-grid-item {
+      height: 36px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .emoji-grid-item:hover, .emoji-grid-item:active {
+      transform: scale(1.15);
+      background: #ec4899;
+    }
+    .custom-emoji-input-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .custom-emoji-input {
+      flex: 1;
+      height: 36px;
+      padding: 0 10px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 10px;
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-size: 13px;
+      outline: none;
+    }
+    .custom-emoji-input:focus {
+      border-color: #ec4899;
+    }
+    .custom-emoji-btn {
+      height: 36px;
+      padding: 0 12px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Kolom Pilihan Mata Pelajaran */
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper::after {
+      content: '';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 6px solid #ec4899;
+      pointer-events: none;
+    }
+    .journal-select {
+      width: 100%;
+      padding: 12px 38px 12px 14px;
+      border: 2px solid var(--input-border);
+      border-radius: 14px;
+      background: var(--input-bg);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--input-text);
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .journal-select:focus {
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236,72,153,.15);
+    }
+
+    /* Dynamic Custom Subject Container (Pelajaran Lainnya) */
+    .custom-subject-box {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: var(--card-sub-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      animation: panelIn 0.25s ease forwards;
+    }
+    .custom-subject-box.show {
+      display: block;
+    }
+    .custom-subject-modes {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-title);
+    }
+    .custom-subject-radio-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .custom-subject-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 12px;
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .custom-subject-input:focus {
+      border-color: #ec4899;
+    }
+    .custom-subject-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Kolom Teks Catatan Refleksi Pemahaman Materi */
+    .journal-textarea {
+      width: 100%;
+      min-height: 110px;
+      border: 2px solid var(--input-border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--input-text);
+      background: var(--input-bg);
+      resize: vertical;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      line-height: 1.6;
+    }
+    .journal-textarea:focus {
+      border-color: #ec4899;
+      box-shadow: 0 0 0 3px rgba(236,72,153,.15);
+    }
+    .journal-textarea::placeholder { color: #f472b6; opacity: .7; }
+
+    /* Tombol Simpan */
+    .journal-save-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(236,72,153,.35);
+      transition: transform .15s ease, box-shadow .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .journal-save-btn:active { transform: scale(.97); }
+    .journal-save-btn svg { width: 18px; height: 18px; }
+
+    /* Riwayat Catatan */
+    .journal-history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 0 2px;
+    }
+    .history-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-title);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .history-count {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-accent);
+      background: var(--card-sub-bg);
+      border: 1px solid var(--card-border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .journal-entry {
+      background: var(--card-bg);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-card);
+      border: 1.5px solid var(--card-border);
+      position: relative;
+      transition: transform .2s ease, opacity .3s ease;
+    }
+    .journal-entry-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding-right: 34px;
+    }
+    .journal-subject-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--card-sub-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-title);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .journal-date-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .journal-entry-mood {
+      font-size: 18px;
+      margin-left: 4px;
+    }
+    .journal-entry-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--card-entry-bg);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--card-entry-border);
+    }
+
+    /* Tombol Hapus pada Masing-Masing Kartu */
+    .journal-entry-delete {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: var(--btn-delete-bg);
+      border-radius: 10px;
+      color: var(--btn-delete-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .journal-entry-delete:hover, .journal-entry-delete:active {
+      background: #f43f5e;
+      color: #ffffff;
+      transform: scale(1.1);
+    }
+    .journal-entry-delete svg { width: 15px; height: 15px; }
+
+    /* ==================== BOTTOM NAV ==================== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 420px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--nav-border);
+      border-left: 1px solid var(--shell-border);
+      border-right: 1px solid var(--shell-border);
+      box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.08);
+      display: flex;
+      z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+      transition: var(--theme-transition);
+    }
+
+    @media (max-width: 420px) {
+      .bottom-nav {
+        border-left: none;
+        border-right: none;
+      }
+    }
+
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0 10px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: color .2s;
+      position: relative;
+      gap: 4px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-tab svg { width: 22px; height: 22px; transition: transform .2s; }
+    .nav-tab span {
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .nav-tab.active { color: var(--text-accent); }
+    .nav-tab.active svg { transform: scale(1.12); }
+    .nav-tab.active::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 32px; height: 3px;
+      background: linear-gradient(90deg, #ec4899, #f472b6);
+      border-radius: 0 0 4px 4px;
+    }
+    .nav-tab:active svg { transform: scale(.88); }
+
+    /* Ripple */
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(244,114,182,.25);
+      transform: scale(0);
+      animation: rippleAnim .5s ease-out;
+      pointer-events: none;
+    }
+    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+    /* Confetti burst */
+    .confetti {
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confettiFall 1s ease-out forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+      100% { opacity: 0; transform: translateY(120px) rotate(720deg) scale(0.3); }
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #831843;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Scrollbar */
+    .main-content::-webkit-scrollbar { width: 0; }
+
+    /* Timer pulse */
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(236,72,153,.35); }
+      50% { box-shadow: 0 0 0 12px rgba(236,72,153,0); }
+    }
+    .timer-card.running { animation: pulse 2s infinite; }
+
+    /* ==================== POPUP AJAKAN REFLEKSI ==================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-card {
+      background: var(--modal-bg);
+      border-radius: 26px;
+      width: 100%;
+      max-width: 360px;
+      padding: 26px 22px 22px;
+      text-align: center;
+      box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--modal-border);
+      transform: translateY(24px) scale(0.94);
+      transition: transform .32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.active .modal-card {
+      transform: translateY(0) scale(1);
+    }
+    .modal-badge-icon {
+      width: 68px; height: 68px;
+      border-radius: 22px;
+      background: var(--card-sub-bg);
+      border: 2px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      margin: 0 auto 16px;
+      box-shadow: 0 8px 20px rgba(236, 72, 153, 0.18);
+    }
+    .modal-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-title);
+      margin-bottom: 8px;
+      letter-spacing: -.3px;
+    }
+    .modal-desc {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+    .modal-desc b {
+      color: #ec4899;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .modal-btn-primary {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: none;
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+      transition: transform .15s ease, box-shadow .2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-btn-primary:active { transform: scale(0.97); }
+    .modal-btn-secondary {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: 1.5px solid var(--card-border);
+      background: var(--card-bg);
+      color: var(--text-title);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .modal-btn-secondary:active { background: var(--card-sub-bg); }
+  </style>
+</head>
+<body>
+
+<div class="phone-shell">
+  <!-- HEADER -->
+  <header class="app-header" id="appHeader">
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="header-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <div class="header-title">Productivity Hub</div>
+          <div class="header-date" id="headerDate"></div>
+        </div>
+      </div>
+      <!-- Dark Mode Toggle Button -->
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Ganti mode gelap / terang" title="Ganti mode gelap / terang">
+        <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="header-greeting">
+      <div class="greeting-text" id="greetingText"></div>
+      <div class="greeting-subtitle" id="greetingSubtitle">Atur harimu sekarang ✨</div>
+    </div>
+    <div class="quick-stats">
+      <div class="stat-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span id="statDone">0</span> selesai
+      </div>
+      <div class="stat-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="statFocus">0</span> menit fokus
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- ===== TAB TUGAS (TODO) ===== -->
+    <div class="tab-panel active" id="panelTugas">
+      <div class="section-header">
+        <div class="section-title">
+          <span>📋</span>
+          <span>Daftar Tugas</span>
+        </div>
+      </div>
+
+      <!-- Form Input Cepat -->
+      <div class="add-task-area">
+        <form class="add-task-form" id="addTaskForm">
+          <input type="text" class="add-task-input" id="taskInput" placeholder="Tulis tugas baru..." maxlength="120" autocomplete="off" required>
+          <button type="submit" class="add-task-btn" aria-label="Tambah tugas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Tombol Pemilih Prioritas Berbentuk Pill: Semua, Tinggi, Sedang, Rendah -->
+      <div class="priority-row" id="priorityRow">
+        <button type="button" class="priority-pill pill-all selected" data-priority="all" title="Tampilkan semua tingkat prioritas">
+          <span class="pill-dot"></span>
+          <span>Semua</span>
+        </button>
+        <button type="button" class="priority-pill pill-high" data-priority="high" title="Hanya tampilkan tugas prioritas Tinggi">
+          <span class="pill-dot"></span>
+          <span>Tinggi</span>
+        </button>
+        <button type="button" class="priority-pill pill-medium" data-priority="medium" title="Hanya tampilkan tugas prioritas Sedang">
+          <span class="pill-dot"></span>
+          <span>Sedang</span>
+        </button>
+        <button type="button" class="priority-pill pill-low" data-priority="low" title="Hanya tampilkan tugas prioritas Rendah">
+          <span class="pill-dot"></span>
+          <span>Rendah</span>
+        </button>
+      </div>
+
+      <!-- Filter Kategori: Semua, Aktif, Selesai -->
+      <div class="filter-row">
+        <button type="button" class="filter-chip active" data-filter="all">Semua</button>
+        <button type="button" class="filter-chip" data-filter="active">Aktif</button>
+        <button type="button" class="filter-chip" data-filter="completed">Selesai</button>
+      </div>
+
+      <!-- Daftar Kartu Sentuh -->
+      <div class="task-list" id="taskList"></div>
+    </div>
+
+    <!-- ===== TAB FOKUS (POMODORO TIMER) ===== -->
+    <div class="tab-panel" id="panelFokus">
+      <div class="focus-panel">
+
+        <!-- Pilihan Mode Sesi (Template Awal: 25 Menit & 5 Menit) -->
+        <div class="session-mode-switch">
+          <button type="button" class="mode-btn active" id="btnModeFocus" data-mode="focus" data-default="25">
+            <span class="mode-icon">🧠</span>
+            <span class="mode-title">Fokus Belajar</span>
+            <span class="mode-sub" id="modeFocusSub">Template: 25m</span>
+          </button>
+          <button type="button" class="mode-btn" id="btnModeBreak" data-mode="break" data-default="5">
+            <span class="mode-icon">☕</span>
+            <span class="mode-title">Istirahat Santai</span>
+            <span class="mode-sub" id="modeBreakSub">Template: 5m</span>
+          </button>
+        </div>
+
+        <div class="timer-card" id="timerCard">
+          <div class="timer-label" id="timerLabel">Sesi Belajar</div>
+
+          <!-- Tampilan Waktu Besar & Ring -->
+          <div class="timer-ring-wrapper">
+            <svg class="timer-ring" viewBox="0 0 200 200">
+              <defs>
+                <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f43f5e"/>
+                  <stop offset="50%" stop-color="#ec4899"/>
+                  <stop offset="100%" stop-color="#f472b6"/>
+                </linearGradient>
+              </defs>
+              <circle class="timer-ring-bg" cx="100" cy="100" r="90"/>
+              <circle class="timer-ring-progress" id="timerProgress" cx="100" cy="100" r="90"/>
+            </svg>
+            <div class="timer-display" id="timerDisplayBox" title="Klik untuk fokus input durasi">
+              <div class="timer-time" id="timerTime">25:00</div>
+              <div class="timer-session" id="timerSessionText">Sesi Fokus #1</div>
+            </div>
+          </div>
+
+          <!-- Pengatur Waktu Kustom: Dapat Diatur Sendiri Bebas -->
+          <div class="custom-time-setter" id="customTimeSetter">
+            <div class="setter-header">
+              <span class="setter-title">⏱️ Atur Durasi Waktu Sendiri:</span>
+              <span class="setter-current" id="setterCurrentMin">25 Menit</span>
+            </div>
+            <div class="setter-controls">
+              <button type="button" class="step-btn" id="btnMinus5" title="Kurangi 5 menit">-5</button>
+              <button type="button" class="step-btn" id="btnMinus1" title="Kurangi 1 menit">-1</button>
+              <div class="setter-input-box" title="Ketik angka menit yang diinginkan">
+                <input type="number" id="inputCustomMin" class="setter-input" min="1" max="180" value="25" aria-label="Jumlah menit">
+                <span class="setter-unit">menit</span>
+              </div>
+              <button type="button" class="step-btn" id="btnPlus1" title="Tambah 1 menit">+1</button>
+              <button type="button" class="step-btn" id="btnPlus5" title="Tambah 5 menit">+5</button>
+            </div>
+          </div>
+
+          <!-- Tombol Kontrol Ramah Jempol: Mulai, Jeda, Atur Ulang -->
+          <div class="timer-controls" id="timerControls">
+            <button type="button" class="timer-btn-main" id="btnStartPause">
+              <svg id="iconPlay" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg id="iconPause" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="display:none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span id="btnLabel">Mulai Fokus</span>
+            </button>
+            <button type="button" class="timer-btn-reset" id="btnReset">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              <span>Atur Ulang</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="focus-stats">
+          <div class="focus-stat-card">
+            <div class="focus-stat-icon pink">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="focus-stat-value" id="totalFocusMin">0</div>
+            <div class="focus-stat-label">Menit Fokus</div>
+          </div>
+          <div class="focus-stat-card">
+            <div class="focus-stat-icon amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+            <div class="focus-stat-value" id="totalSessions">0</div>
+            <div class="focus-stat-label">Sesi Selesai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB JURNAL REFLEKSI ===== -->
+    <div class="tab-panel" id="panelJurnal">
+      <div class="journal-panel">
+
+        <!-- Form Catatan Refleksi Ringkas -->
+        <div class="journal-compose">
+          <div class="journal-compose-header">
+            <div class="journal-compose-title">
+              <span>✍️</span>
+              <span>Catatan Refleksi</span>
+            </div>
+            <!-- Input Tanggal Hari Ini Otomatis -->
+            <div class="journal-auto-date" title="Tanggal otomatis hari ini">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span id="journalDateBadge">Hari ini</span>
+            </div>
+          </div>
+
+          <!-- Pilihan Mood Belajar Dinamis & Fleksibel -->
+          <div class="mood-section">
+            <label class="field-label">Bagaimana Perasaan Belajarmu?</label>
+            <div class="mood-selector" id="moodSelector">
+              <button type="button" class="mood-btn selected" data-mood="😊" title="Senang">😊</button>
+              <button type="button" class="mood-btn" data-mood="🔥" title="Semangat">🔥</button>
+              <button type="button" class="mood-btn" data-mood="😌" title="Tenang">😌</button>
+              <button type="button" class="mood-btn" data-mood="🤔" title="Berpikir Keras">🤔</button>
+              <button type="button" class="mood-btn" data-mood="🥱" title="Lelah">🥱</button>
+              <button type="button" class="mood-btn more-btn" id="btnToggleEmojiDrawer" title="Pilih emoji lainnya">
+                <span>✨</span><span>Lainnya</span>
+              </button>
+            </div>
+
+            <!-- Active Custom Mood Display if selected -->
+            <div class="active-custom-mood" id="activeCustomMoodPill">
+              <span>Emoji terpilih:</span>
+              <span class="mood-char" id="activeCustomMoodChar">✨</span>
+              <span style="font-size:11px; color:var(--text-muted);">(Kustom)</span>
+            </div>
+
+            <!-- Expandable Emoji Drawer / Palette -->
+            <div class="emoji-drawer" id="emojiDrawer">
+              <div class="emoji-drawer-header">
+                <span>Pilih dari koleksi atau ketik emoji bebas:</span>
+                <span style="font-size:10px; color:var(--text-muted); cursor:pointer;" id="btnCloseEmojiDrawer">✕ Tutup</span>
+              </div>
+              <div class="emoji-grid" id="presetEmojiGrid">
+                <!-- Koleksi emoji tambahan pilihan -->
+                <button type="button" class="emoji-grid-item" data-emoji="🤩" title="Sangat Takjub">🤩</button>
+                <button type="button" class="emoji-grid-item" data-emoji="💡" title="Paham Ide Baru">💡</button>
+                <button type="button" class="emoji-grid-item" data-emoji="🎯" title="Fokus Penuh">🎯</button>
+                <button type="button" class="emoji-grid-item" data-emoji="⚡" title="Berenergi Tinggi">⚡</button>
+                <button type="button" class="emoji-grid-item" data-emoji="🥳" title="Bangga / Merayakan">🥳</button>
+                <button type="button" class="emoji-grid-item" data-emoji="🤯" title="Materi Menantang">🤯</button>
+                <button type="button" class="emoji-grid-item" data-emoji="😴" title="Mengantuk">😴</button>
+                <button type="button" class="emoji-grid-item" data-emoji="📚" title="Banyak Membaca">📚</button>
+                <button type="button" class="emoji-grid-item" data-emoji="🏆" title="Target Tercapai">🏆</button>
+                <button type="button" class="emoji-grid-item" data-emoji="🧘" title="Tenang & Damai">🧘</button>
+                <button type="button" class="emoji-grid-item" data-emoji="☕" title="Santai">☕</button>
+                <button type="button" class="emoji-grid-item" data-emoji="🚀" title="Progres Cepat">🚀</button>
+                <button type="button" class="emoji-grid-item" data-emoji="💪" title="Kuat & Pantang Menyerah">💪</button>
+                <button type="button" class="emoji-grid-item" data-emoji="✨" title="Terinspirasi">✨</button>
+              </div>
+              <div class="custom-emoji-input-row">
+                <input type="text" class="custom-emoji-input" id="customEmojiInput" placeholder="Ketik atau paste emoji bebas..." maxlength="10">
+                <button type="button" class="custom-emoji-btn" id="btnApplyCustomEmoji">Pakai</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kolom Pilihan Mata Pelajaran yang Baru Dipelajari -->
+          <div class="form-group">
+            <label class="field-label" for="journalSubject">Mata Pelajaran yang Baru Dipelajari</label>
+            <div class="select-wrapper">
+              <select class="journal-select" id="journalSubject">
+                <option value="Matematika 📐">📐 Matematika</option>
+                <option value="Bahasa Indonesia 📖">📖 Bahasa Indonesia</option>
+                <option value="Bahasa Inggris 🌍">🌍 Bahasa Inggris</option>
+                <option value="IPA / Sains 🔬">🔬 IPA / Sains</option>
+                <option value="IPS / Sejarah 🏛️">🏛️ IPS / Sejarah</option>
+                <option value="Informatika / Coding 💻">💻 Informatika / Coding</option>
+                <option value="Seni & Budaya 🎨">🎨 Seni & Budaya</option>
+                <option value="Pendidikan Agama & Moral 📚">📚 Pendidikan Agama & Moral</option>
+                <option value="__OTHER__">✏️ Pelajaran Lainnya</option>
+              </select>
+            </div>
+
+            <!-- Dynamic Section when "Pelajaran Lainnya" is selected -->
+            <div class="custom-subject-box" id="customSubjectBox">
+              <div class="custom-subject-modes">
+                <label class="custom-subject-radio-label">
+                  <input type="radio" name="otherSubjectMode" value="custom" id="radioOtherCustom" checked>
+                  <span>Ketik pelajaran sendiri</span>
+                </label>
+                <label class="custom-subject-radio-label">
+                  <input type="radio" name="otherSubjectMode" value="stay" id="radioOtherStay">
+                  <span>Tetap "Pelajaran Lainnya"</span>
+                </label>
+              </div>
+              <input type="text" class="custom-subject-input" id="customSubjectInput" placeholder="Contoh: Fisika Kuantum, Robotika, Desain Grafis..." maxlength="60">
+            </div>
+          </div>
+
+          <!-- Kolom Teks Catatan Refleksi Pemahaman Materi -->
+          <div class="form-group">
+            <label class="field-label" for="journalText">Catatan Refleksi Pemahaman Materi</label>
+            <textarea class="journal-textarea" id="journalText" placeholder="Tuliskan pemahaman materi, konsep yang baru dikuasai, atau evaluasi belajarmu hari ini..." maxlength="1200"></textarea>
+          </div>
+
+          <!-- Tombol Simpan Catatan Refleksi -->
+          <button type="button" class="journal-save-btn" id="journalSaveBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+              <polyline points="17 21 17 13 7 13 7 21"/>
+              <polyline points="7 3 7 8 15 8"/>
+            </svg>
+            <span>Simpan Catatan Refleksi</span>
+          </button>
+        </div>
+
+        <!-- Riwayat Catatan -->
+        <div class="journal-history-header">
+          <div class="history-title">
+            <span>📖</span>
+            <span>Riwayat Refleksi Belajar</span>
+          </div>
+          <span class="history-count" id="journalCountBadge">0 Catatan</span>
+        </div>
+        <div id="journalEntries"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAV (Fixed Bottom) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-tab active" data-tab="panelTugas" id="navTugas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+      <span>Tugas</span>
+    </button>
+    <button class="nav-tab" data-tab="panelFokus" id="navFokus">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>Fokus</span>
+    </button>
+    <button class="nav-tab" data-tab="panelJurnal" id="navJurnal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        <line x1="8" y1="7" x2="16" y2="7"/>
+        <line x1="8" y1="11" x2="14" y2="11"/>
+      </svg>
+      <span>Jurnal</span>
+    </button>
+  </nav>
+
+  <!-- Popup Ajakan Refleksi (Modal) -->
+  <div class="modal-overlay" id="reflectionModal">
+    <div class="modal-card">
+      <div class="modal-badge-icon">🎓✨</div>
+      <div class="modal-title" id="modalTitle">Sesi Fokus Tuntas! 🎉</div>
+      <div class="modal-desc" id="modalDesc">
+        Kerja luar biasa! Kamu telah menyelesaikan sesi belajar dengan penuh fokus. Yuk, luangkan 1 menit untuk mencatat <b>evaluasi belajar</b> dan insight barumu di Tab Jurnal!
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="modal-btn-primary" id="btnGoToJournal">
+          <span>✍️</span>
+          <span>Catat Evaluasi di Jurnal</span>
+        </button>
+        <button type="button" class="modal-btn-secondary" id="btnCloseModal">
+          <span>Nanti Saja</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ===================== UTILITIES & LOCALSTORAGE =====================
+  const $ = id => document.getElementById(id);
+  const LS = {
+    get(k) { try { return JSON.parse(localStorage.getItem('ph_' + k)); } catch { return null; } },
+    set(k, v) { localStorage.setItem('ph_' + k, JSON.stringify(v)); }
+  };
+
+  function formatDate(d) {
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function formatShortDate(d) {
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function formatTime(d) {
+    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  function burstConfetti(x, y) {
+    const colors = ['#ec4899','#f472b6','#fb7185','#f43f5e','#f59e0b','#10b981','#a855f7'];
+    for (let i = 0; i < 16; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = x + 'px';
+      c.style.top = y + 'px';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.transform = `translate(${(Math.random()-.5)*140}px, ${-Math.random()*90}px)`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 1100);
+    }
+  }
+
+  // ===================== DARK MODE TOGGLE =====================
+  let isDarkMode = LS.get('theme') === 'dark';
+  function applyTheme(dark) {
+    isDarkMode = dark;
+    if (dark) {
+      document.body.classList.add('dark-mode');
+      $('themeIconSun').style.display = 'block';
+      $('themeIconMoon').style.display = 'none';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#111827');
+    } else {
+      document.body.classList.remove('dark-mode');
+      $('themeIconSun').style.display = 'none';
+      $('themeIconMoon').style.display = 'block';
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f472b6');
+    }
+    LS.set('theme', dark ? 'dark' : 'light');
+  }
+
+  // Auto check system preference if user hasn't explicitly set yet
+  if (LS.get('theme') === null) {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      isDarkMode = true;
+    }
+  }
+  applyTheme(isDarkMode);
+
+  $('themeToggleBtn').addEventListener('click', () => {
+    applyTheme(!isDarkMode);
+    showToast(isDarkMode ? '🌙 Mode gelap diaktifkan' : '☀️ Mode terang diaktifkan');
+  });
+
+  // ===================== ALARM AUDIO NATIVE (WEB AUDIO API) =====================
+  function playNativeAlarm() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // Rangkaian 3 nada beep melodi lembut (G5, C6, E6)
+      const notes = [
+        { f: 783.99, t: 0, d: 0.16 },    // G5
+        { f: 1046.50, t: 0.18, d: 0.16 }, // C6
+        { f: 1318.51, t: 0.36, d: 0.35 }  // E6
+      ];
+
+      notes.forEach(n => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(n.f, ctx.currentTime + n.t);
+
+        gain.gain.setValueAtTime(0, ctx.currentTime + n.t);
+        gain.gain.linearRampToValueAtTime(0.28, ctx.currentTime + n.t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + n.t + n.d);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(ctx.currentTime + n.t);
+        osc.stop(ctx.currentTime + n.t + n.d + 0.05);
+      });
+    } catch (e) {
+      console.warn('Web Audio error:', e);
+    }
+  }
+
+  // ===================== HEADER =====================
+  function updateHeader() {
+    const now = new Date();
+    $('headerDate').textContent = formatDate(now);
+    const h = now.getHours();
+    let greet = 'Selamat malam 🌙';
+    if (h >= 5 && h < 12) greet = 'Selamat pagi ☀️';
+    else if (h >= 12 && h < 17) greet = 'Selamat siang 🌤️';
+    else if (h >= 17 && h < 21) greet = 'Selamat sore 🌅';
+    $('greetingText').textContent = greet;
+
+    // Set auto date on Journal Form
+    $('journalDateBadge').textContent = formatShortDate(now);
+  }
+  updateHeader();
+
+  function updateStats() {
+    const taskData = LS.get('tasks') || [];
+    $('statDone').textContent = taskData.filter(t => t.done).length;
+    const focus = LS.get('focusStats') || { minutes: 0, sessions: 0 };
+    $('statFocus').textContent = focus.minutes;
+    $('totalFocusMin').textContent = focus.minutes;
+    $('totalSessions').textContent = focus.sessions;
+  }
+
+  // ===================== TAB NAVIGATION =====================
+  const panels = document.querySelectorAll('.tab-panel');
+  const navTabs = document.querySelectorAll('.nav-tab');
+
+  function switchTab(tabId) {
+    panels.forEach(p => { p.classList.remove('active'); p.style.animation = 'none'; });
+    navTabs.forEach(t => t.classList.remove('active'));
+    const panel = $(tabId);
+    if (!panel) return;
+    panel.classList.add('active');
+    void panel.offsetWidth;
+    panel.style.animation = '';
+    const activeNav = document.querySelector(`[data-tab="${tabId}"]`);
+    if (activeNav) activeNav.classList.add('active');
+  }
+
+  $('bottomNav').addEventListener('click', e => {
+    const tab = e.target.closest('.nav-tab');
+    if (!tab) return;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const rect = tab.getBoundingClientRect();
+    const sz = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = sz + 'px';
+    ripple.style.left = (e.clientX || rect.left + rect.width/2) - rect.left - sz/2 + 'px';
+    ripple.style.top = (e.clientY || rect.top + rect.height/2) - rect.top - sz/2 + 'px';
+    tab.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+
+    switchTab(tab.dataset.tab);
+  });
+
+  // ===================== TAB TUGAS (TODO) =====================
+  let tasks = LS.get('tasks');
+  if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+    tasks = [
+      { id: 1717000001, text: 'Rancang wireframe antarmuka mobile', priority: 'high', done: true, timeLabel: '09:00' },
+      { id: 1717000002, text: 'Evaluasi jadwal tugas mingguan', priority: 'medium', done: false, timeLabel: '10:30' },
+      { id: 1717000003, text: 'Sesi membaca buku produktivitas 15 menit', priority: 'low', done: false, timeLabel: '13:00' }
+    ];
+    LS.set('tasks', tasks);
+  }
+
+  let selectedPriority = 'all'; // Default 'all' atau filter prioritas spesifik ('high', 'medium', 'low')
+  let currentFilter = 'all';    // 'all', 'active', 'completed'
+
+  // Tombol Filter Prioritas: Semua, Tinggi, Sedang, Rendah
+  document.querySelectorAll('.priority-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const p = pill.dataset.priority;
+      if (selectedPriority === p && p !== 'all') {
+        selectedPriority = 'all';
+      } else {
+        selectedPriority = p;
+      }
+
+      document.querySelectorAll('.priority-pill').forEach(b => {
+        b.classList.toggle('selected', b.dataset.priority === selectedPriority);
+      });
+
+      renderTasks();
+    });
+  });
+
+  // Filter Status: Semua, Aktif, Selesai
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.dataset.filter;
+      renderTasks();
+    });
+  });
+
+  function renderTasks() {
+    const list = $('taskList');
+    let filtered = tasks;
+
+    // 1. Filter Status: Aktif / Selesai / Semua
+    if (currentFilter === 'active') filtered = filtered.filter(t => !t.done);
+    if (currentFilter === 'completed') filtered = filtered.filter(t => t.done);
+
+    // 2. Filter Tingkat Prioritas: Tinggi / Sedang / Rendah
+    if (selectedPriority !== 'all') {
+      filtered = filtered.filter(t => t.priority === selectedPriority);
+    }
+
+    if (filtered.length === 0) {
+      let emptyMsg = 'Belum ada tugas';
+      if (selectedPriority !== 'all') {
+        const pLabel = selectedPriority === 'high' ? 'Tinggi' : selectedPriority === 'medium' ? 'Sedang' : 'Rendah';
+        emptyMsg = `Tidak ada tugas dengan prioritas ${pLabel}`;
+      } else if (currentFilter === 'completed') {
+        emptyMsg = 'Belum ada tugas selesai';
+      } else if (currentFilter === 'active') {
+        emptyMsg = 'Semua tugas aktif sudah selesai! 🎉';
+      }
+
+      list.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="empty-title">${emptyMsg}</div>
+          <div class="empty-sub">Coba ubah filter prioritas atau status di atas</div>
+        </div>`;
+      updateStats();
+      return;
+    }
+
+    const pw = { high: 0, medium: 1, low: 2 };
+    const sorted = [...filtered].sort((a, b) => {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      if (pw[a.priority] !== pw[b.priority]) return pw[a.priority] - pw[b.priority];
+      return b.id - a.id;
+    });
+
+    list.innerHTML = sorted.map(t => {
+      const badgeText = t.priority === 'high' ? 'Tinggi' : t.priority === 'medium' ? 'Sedang' : 'Rendah';
+      const badgeClass = t.priority === 'high' ? 'badge-high' : t.priority === 'medium' ? 'badge-medium' : 'badge-low';
+      return `
+        <div class="task-card priority-${t.priority} ${t.done ? 'completed' : ''}" data-id="${t.id}">
+          <button type="button" class="task-check ${t.done ? 'checked' : ''}" data-action="toggle" aria-label="Tandai selesai">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <div class="task-info" data-action="toggle">
+            <div class="task-text">${escHtml(t.text)}</div>
+            <div class="task-meta">
+              <span>${t.timeLabel}</span>
+              <span>·</span>
+              <span class="task-badge ${badgeClass}">${badgeText}</span>
+            </div>
+          </div>
+          <button type="button" class="task-delete" data-action="delete" aria-label="Hapus tugas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </button>
+        </div>`;
+    }).join('');
+    updateStats();
+  }
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // Tambah Tugas Cepat
+  $('addTaskForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const inp = $('taskInput');
+    const text = inp.value.trim();
+    if (!text) return;
+
+    const newTaskPriority = selectedPriority !== 'all' ? selectedPriority : 'medium';
+
+    tasks.unshift({
+      id: Date.now(),
+      text,
+      priority: newTaskPriority,
+      done: false,
+      timeLabel: formatTime(new Date())
+    });
+    LS.set('tasks', tasks);
+    inp.value = '';
+
+    renderTasks();
+    showToast('✨ Tugas ditambahkan!');
+  });
+
+  $('taskList').addEventListener('click', e => {
+    const card = e.target.closest('.task-card');
+    if (!card) return;
+    const id = Number(card.dataset.id);
+    const action = e.target.closest('[data-action]');
+    if (!action) return;
+
+    if (action.dataset.action === 'toggle') {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.done = !task.done;
+        if (task.done) {
+          const rect = card.getBoundingClientRect();
+          burstConfetti(rect.left + rect.width / 2, rect.top + 10);
+          showToast('🎉 Tugas diselesaikan!');
+        }
+        LS.set('tasks', tasks);
+        renderTasks();
+      }
+    }
+
+    if (action.dataset.action === 'delete') {
+      card.classList.add('removing');
+      setTimeout(() => {
+        tasks = tasks.filter(t => t.id !== id);
+        LS.set('tasks', tasks);
+        renderTasks();
+        showToast('🗑️ Tugas dihapus');
+      }, 350);
+    }
+  });
+
+  renderTasks();
+
+  // ===================== TAB FOKUS (POMODORO TIMER DENGAN WAKTU KUSTOM) =====================
+  let currentMode = 'focus'; // 'focus' atau 'break'
+  let focusMinutes = 25;     // Template awal 25 menit
+  let breakMinutes = 5;      // Template awal 5 menit
+  let activeMinutes = 25;    // Durasi aktif saat ini
+
+  let timerDuration = activeMinutes * 60;
+  let timerRemaining = timerDuration;
+  let timerInterval = null;
+  let timerRunning = false;
+  let timerSessionCount = 1;
+  const circumference = 2 * Math.PI * 90;
+
+  function focusStats() { return LS.get('focusStats') || { minutes: 0, sessions: 0 }; }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(timerRemaining / 60);
+    const s = timerRemaining % 60;
+    $('timerTime').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const progress = 1 - (timerRemaining / timerDuration);
+    $('timerProgress').style.strokeDasharray = circumference;
+    $('timerProgress').style.strokeDashoffset = circumference * (1 - progress);
+
+    if (currentMode === 'focus') {
+      $('timerSessionText').textContent = `Sesi Fokus #${timerSessionCount}`;
+      $('timerLabel').textContent = timerRunning ? '⏳ Sedang Fokus...' : 'Sesi Belajar';
+    } else {
+      $('timerSessionText').textContent = `Waktu Rehat Santai`;
+      $('timerLabel').textContent = timerRunning ? '☕ Sedang Istirahat...' : 'Istirahat Santai';
+    }
+
+    $('setterCurrentMin').textContent = `${activeMinutes} Menit`;
+    $('inputCustomMin').value = activeMinutes;
+  }
+
+  // Fungsi untuk mengatur durasi menit secara kustom & bebas
+  function setCustomMinutes(mins) {
+    mins = Math.max(1, Math.min(180, Math.round(mins)));
+    if (timerRunning) {
+      pauseTimer();
+      showToast('⏸️ Timer dijeda untuk penyesuaian waktu');
+    }
+    activeMinutes = mins;
+    if (currentMode === 'focus') {
+      focusMinutes = mins;
+      $('modeFocusSub').textContent = `${mins} Menit`;
+    } else {
+      breakMinutes = mins;
+      $('modeBreakSub').textContent = `${mins} Menit`;
+    }
+
+    timerDuration = activeMinutes * 60;
+    timerRemaining = timerDuration;
+    resetTimerUI();
+    updateTimerDisplay();
+  }
+
+  // Tombol Stepper Penyesuaian Waktu (+1, +5, -1, -5)
+  $('btnMinus5').addEventListener('click', () => setCustomMinutes(activeMinutes - 5));
+  $('btnMinus1').addEventListener('click', () => setCustomMinutes(activeMinutes - 1));
+  $('btnPlus1').addEventListener('click', () => setCustomMinutes(activeMinutes + 1));
+  $('btnPlus5').addEventListener('click', () => setCustomMinutes(activeMinutes + 5));
+
+  // Input Langsung Angka Menit
+  $('inputCustomMin').addEventListener('change', e => {
+    let val = parseInt(e.target.value, 10);
+    if (isNaN(val) || val < 1) val = 1;
+    if (val > 180) val = 180;
+    setCustomMinutes(val);
+  });
+
+  // Klik angka waktu besar untuk fokus ke input durasi kustom
+  $('timerDisplayBox').addEventListener('click', () => {
+    if (!timerRunning) {
+      $('inputCustomMin').focus();
+      $('inputCustomMin').select();
+      showToast('⏱️ Atur durasi menit sesuai keinginanmu');
+    }
+  });
+
+  // Pilihan Mode Sesi (Template Awal: 25 Menit & 5 Menit)
+  $('btnModeFocus').addEventListener('click', () => {
+    switchTimerMode('focus', 25);
+  });
+
+  $('btnModeBreak').addEventListener('click', () => {
+    switchTimerMode('break', 5);
+  });
+
+  function switchTimerMode(mode, templateMins) {
+    if (timerRunning) {
+      pauseTimer();
+    }
+    currentMode = mode;
+    $('btnModeFocus').classList.toggle('active', mode === 'focus');
+    $('btnModeBreak').classList.toggle('active', mode === 'break');
+
+    activeMinutes = templateMins;
+    if (mode === 'focus') {
+      focusMinutes = templateMins;
+      $('modeFocusSub').textContent = `Template: 25m`;
+      showToast('🧠 Mode Fokus Belajar diatur (Template: 25m)');
+    } else {
+      breakMinutes = templateMins;
+      $('modeBreakSub').textContent = `Template: 5m`;
+      showToast('☕ Mode Istirahat Santai diatur (Template: 5m)');
+    }
+
+    timerDuration = activeMinutes * 60;
+    timerRemaining = timerDuration;
+    resetTimerUI();
+    updateTimerDisplay();
+  }
+
+  function startTimer() {
+    timerRunning = true;
+    $('btnLabel').textContent = 'Jeda';
+    $('iconPlay').style.display = 'none';
+    $('iconPause').style.display = 'block';
+    $('btnStartPause').classList.add('paused');
+    $('timerCard').classList.add('running');
+    $('timerLabel').textContent = currentMode === 'focus' ? '⏳ Sedang Fokus...' : '☕ Sedang Istirahat...';
+
+    timerInterval = setInterval(() => {
+      timerRemaining--;
+      updateTimerDisplay();
+
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        $('timerCard').classList.remove('running');
+        resetTimerUI();
+
+        playNativeAlarm();
+
+        const cardRect = $('timerCard').getBoundingClientRect();
+        burstConfetti(cardRect.left + cardRect.width / 2, cardRect.top + 80);
+
+        if (currentMode === 'focus') {
+          const stats = focusStats();
+          stats.minutes += activeMinutes;
+          stats.sessions++;
+          LS.set('focusStats', stats);
+          updateStats();
+          timerSessionCount++;
+
+          $('modalTitle').textContent = 'Sesi Fokus Tuntas! 🎉';
+          $('modalDesc').innerHTML = `Kerja luar biasa! Kamu telah menyelesaikan <b>${activeMinutes} menit belajar</b> dengan penuh fokus. Yuk, luangkan 1 menit untuk mencatat <b>evaluasi belajar</b> dan insight barumu di Tab Jurnal!`;
+          $('reflectionModal').classList.add('active');
+
+          timerRemaining = timerDuration;
+          updateTimerDisplay();
+        } else {
+          showToast('⏰ Waktu istirahat selesai! Siap untuk kembali belajar?');
+          $('modalTitle').textContent = 'Istirahat Selesai! ☀️';
+          $('modalDesc').innerHTML = `Waktu rehat ${activeMinutes} menit sudah selesai. Pikiranmu sudah segar kembali. Yuk, mulai <b>Sesi Fokus Belajar</b> berikutnya!`;
+          $('reflectionModal').classList.add('active');
+
+          timerRemaining = timerDuration;
+          updateTimerDisplay();
+        }
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    resetTimerUI();
+    $('timerCard').classList.remove('running');
+    $('timerLabel').textContent = '⏸️ Dijeda';
+  }
+
+  function resetTimerUI() {
+    $('btnLabel').textContent = currentMode === 'focus' ? 'Mulai Fokus' : 'Mulai Rehat';
+    $('iconPlay').style.display = 'block';
+    $('iconPause').style.display = 'none';
+    $('btnStartPause').classList.remove('paused');
+  }
+
+  $('btnStartPause').addEventListener('click', () => {
+    if (timerRunning) {
+      pauseTimer();
+    } else {
+      startTimer();
+    }
+  });
+
+  $('btnReset').addEventListener('click', () => {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    timerRemaining = timerDuration;
+    resetTimerUI();
+    $('timerCard').classList.remove('running');
+    updateTimerDisplay();
+    showToast('🔄 Timer diatur ulang');
+  });
+
+  updateTimerDisplay();
+
+  // ===================== AJAKAN REFLEKSI (MODAL POPUP) =====================
+  $('btnGoToJournal').addEventListener('click', () => {
+    $('reflectionModal').classList.remove('active');
+    switchTab('panelJurnal');
+
+    const textarea = $('journalText');
+    const template = `Evaluasi Belajar:\n- Konsep yang baru dikuasai: \n- Hal yang masih membingungkan: \n- Rencana langkah berikutnya: `;
+    if (!textarea.value.trim()) {
+      textarea.value = template;
+    }
+    textarea.focus();
+    showToast('📝 Tulis evaluasi belajarmu di sini!');
+  });
+
+  $('btnCloseModal').addEventListener('click', () => {
+    $('reflectionModal').classList.remove('active');
+  });
+
+  // ===================== TAB JURNAL REFLEKSI (EMOJI FLEKSIBEL & PELAJARAN LAINNYA) =====================
+  let defaultJournals = [
+    {
+      id: 1717000001,
+      subject: 'Matematika 📐',
+      text: 'Berhasil memahami konsep integral substitusi setelah latihan 5 soal. Masih perlu lebih teliti pada tanda minus saat mengalikan pecahan.',
+      mood: '😊',
+      date: formatDate(new Date()),
+      time: '09:30'
+    },
+    {
+      id: 1717000002,
+      subject: 'IPA / Sains 🔬',
+      text: 'Memahami prinsip hukum kekekalan energi dan penerapannya pada gerak harmonik sederhana. Sangat seru ketika menghubungkannya dengan eksperimen bandul!',
+      mood: '🔥',
+      date: formatDate(new Date()),
+      time: '11:15'
+    }
+  ];
+
+  let journals = LS.get('journals');
+  if (!journals || !Array.isArray(journals) || journals.length === 0) {
+    journals = defaultJournals;
+    LS.set('journals', journals);
+  }
+
+  let selectedMood = '😊';
+
+  // Standar 5 mood click handler
+  $('moodSelector').addEventListener('click', e => {
+    const btn = e.target.closest('.mood-btn');
+    if (!btn) return;
+    if (btn.id === 'btnToggleEmojiDrawer') {
+      const drawer = $('emojiDrawer');
+      drawer.classList.toggle('open');
+      return;
+    }
+
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedMood = btn.dataset.mood;
+    $('activeCustomMoodPill').classList.remove('show');
+    $('emojiDrawer').classList.remove('open');
+  });
+
+  $('btnCloseEmojiDrawer').addEventListener('click', () => {
+    $('emojiDrawer').classList.remove('open');
+  });
+
+  // Pemilihan dari grid emoji preset
+  $('presetEmojiGrid').addEventListener('click', e => {
+    const item = e.target.closest('.emoji-grid-item');
+    if (!item) return;
+    const emoji = item.dataset.emoji;
+    selectCustomEmoji(emoji);
+  });
+
+  // Input emoji kustom sendiri
+  $('btnApplyCustomEmoji').addEventListener('click', () => {
+    const val = $('customEmojiInput').value.trim();
+    if (!val) {
+      showToast('⚠️ Silakan ketik atau pilih emoji terlebih dahulu!');
+      $('customEmojiInput').focus();
+      return;
+    }
+    selectCustomEmoji(val);
+    $('customEmojiInput').value = '';
+  });
+
+  $('customEmojiInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('btnApplyCustomEmoji').click();
+    }
+  });
+
+  function selectCustomEmoji(emoji) {
+    selectedMood = emoji;
+    document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+    $('activeCustomMoodChar').textContent = emoji;
+    $('activeCustomMoodPill').classList.add('show');
+    $('emojiDrawer').classList.remove('open');
+    showToast(`Emoji dipilih: ${emoji}`);
+  }
+
+  // ===================== KONTROL MATA PELAJARAN LAINNYA =====================
+  const journalSubjectSelect = $('journalSubject');
+  const customSubjectBox = $('customSubjectBox');
+  const customSubjectInput = $('customSubjectInput');
+  const radioOtherCustom = $('radioOtherCustom');
+  const radioOtherStay = $('radioOtherStay');
+
+  journalSubjectSelect.addEventListener('change', () => {
+    if (journalSubjectSelect.value === '__OTHER__') {
+      customSubjectBox.classList.add('show');
+      if (radioOtherCustom.checked) {
+        customSubjectInput.style.display = 'block';
+        customSubjectInput.focus();
+      }
+    } else {
+      customSubjectBox.classList.remove('show');
+    }
+  });
+
+  radioOtherCustom.addEventListener('change', () => {
+    if (radioOtherCustom.checked) {
+      customSubjectInput.style.display = 'block';
+      customSubjectInput.focus();
+    }
+  });
+
+  radioOtherStay.addEventListener('change', () => {
+    if (radioOtherStay.checked) {
+      customSubjectInput.style.display = 'none';
+    }
+  });
+
+  // Simpan Catatan Refleksi
+  $('journalSaveBtn').addEventListener('click', () => {
+    const text = $('journalText').value.trim();
+    if (!text) {
+      showToast('⚠️ Tuliskan catatan refleksi materi terlebih dahulu!');
+      $('journalText').focus();
+      return;
+    }
+
+    let finalSubject = journalSubjectSelect.value;
+    if (finalSubject === '__OTHER__') {
+      if (radioOtherCustom.checked && customSubjectInput.value.trim()) {
+        const customName = customSubjectInput.value.trim();
+        finalSubject = customName.includes('✏️') || customName.includes('📚') ? customName : `${customName} ✏️`;
+      } else {
+        finalSubject = 'Pelajaran Lainnya ✏️';
+      }
+    }
+
+    const now = new Date();
+
+    journals.unshift({
+      id: Date.now(),
+      subject: finalSubject,
+      text: text,
+      mood: selectedMood || '😊',
+      date: formatDate(now),
+      time: formatTime(now)
+    });
+
+    LS.set('journals', journals);
+    $('journalText').value = '';
+    customSubjectInput.value = '';
+    renderJournals();
+
+    showToast('💾 Catatan refleksi berhasil disimpan!');
+    burstConfetti(window.innerWidth / 2, window.innerHeight / 2);
+  });
+
+  function renderJournals() {
+    const container = $('journalEntries');
+    const countBadge = $('journalCountBadge');
+
+    countBadge.textContent = `${journals.length} Catatan`;
+
+    if (journals.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+          </div>
+          <div class="empty-title">Belum ada riwayat refleksi</div>
+          <div class="empty-sub">Simpan evaluasi dan pemahaman materi pertamamu di atas</div>
+        </div>`;
+      return;
+    }
+
+    const sorted = [...journals].sort((a, b) => b.id - a.id);
+
+    container.innerHTML = sorted.map(j => `
+      <div class="journal-entry" data-id="${j.id}">
+        <div class="journal-entry-top">
+          <div>
+            <span class="journal-subject-pill">${escHtml(j.subject || 'Refleksi Umum 📝')}</span>
+            <div class="journal-date-badge">${j.date} · ${j.time}</div>
+          </div>
+          <div class="journal-entry-mood" title="Mood">${escHtml(j.mood || '😊')}</div>
+        </div>
+        <div class="journal-entry-text">${escHtml(j.text)}</div>
+        <button type="button" class="journal-entry-delete" data-action="delete-journal" aria-label="Hapus catatan refleksi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      </div>`).join('');
+  }
+
+  $('journalEntries').addEventListener('click', e => {
+    const btn = e.target.closest('[data-action="delete-journal"]');
+    if (!btn) return;
+    const entry = btn.closest('.journal-entry');
+    const id = Number(entry.dataset.id);
+
+    entry.style.transition = 'opacity .3s ease, transform .3s ease';
+    entry.style.opacity = '0';
+    entry.style.transform = 'scale(.94) translateY(10px)';
+
+    setTimeout(() => {
+      journals = journals.filter(j => j.id !== id);
+      LS.set('journals', journals);
+      renderJournals();
+      showToast('🗑️ Catatan refleksi dihapus');
+    }, 300);
+  });
+
+  renderJournals();
+  updateStats();
+})();
+</script>
+</body>
+</html>
